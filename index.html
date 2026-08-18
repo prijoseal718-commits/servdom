@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServDom</title>
+    <style>
+        *{margin:0; padding:0; box-sizing:border-box; font-family:sans-serif;}
+        :root{
+            --fondo:#0F172A;
+            --capa:#1E293B;
+            --dorado:#F59E0B;
+            --texto:#F1F5F9;
+            --campo-fondo:#E2E8F0;
+            --campo-texto:#000000;
+        }
+        body{background:var(--fondo); color:var(--texto); min-height:100vh; padding:16px;}
+        .saludo{padding:12px; color:var(--dorado); font-size:17px; margin-bottom:16px; border-bottom:1px solid rgba(96,165,250,0.3);}
+        .menu{display:flex; flex-direction:column; gap:10px; max-width:500px; margin:0 auto;}
+        .menu button{background:linear-gradient(135deg,#1E293B,#334155); color:var(--texto); border:none; padding:16px; border-radius:12px; font-size:16px; text-align:left; cursor:pointer; border-left:3px solid transparent;}
+        .menu button:hover{border-left-color:var(--dorado);}
+        .menu button.rojo{background:linear-gradient(135deg,#7F1D1D,#991B1B); margin-top:20px;}
+        .pantalla{display:none; max-width:500px; margin:0 auto;}
+        .pantalla.activa{display:block; animation:aparecer 0.25s ease;}
+        @keyframes aparecer{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+        .volver{background:#475569; color:#fff; border:none; padding:10px 16px; border-radius:10px; margin-bottom:16px; cursor:pointer;}
+        h2{color:var(--dorado); margin-bottom:16px; font-size:19px;}
+        .tarjeta{background:var(--capa); border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid rgba(96,165,250,0.25);}
+        input,select,textarea{width:100%; padding:14px; margin:6px 0; background:var(--campo-fondo); color:var(--campo-texto); border:none; border-radius:10px; font-size:15px; outline:none;}
+        input:focus{box-shadow:0 0 0 2px var(--dorado);}
+        .btn{width:100%; padding:14px; border:none; border-radius:10px; font-size:15px; cursor:pointer; margin-top:8px;}
+        .btn.dorado{background:linear-gradient(135deg,#B7921F,#F59E0B); color:#000;}
+        .fila{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(96,165,250,0.15); font-size:14px;}
+        .etiqueta{color:#CBD5E1;}
+        .oculto{display:none !important;}
+        .registro{max-width:420px; margin:40px auto; text-align:center;}
+        .logo{font-size:42px; color:var(--dorado); margin-bottom:10px; font-weight:bold;}
+    </style>
+</head>
+<body>
+
+<div id="pantallaRegistro">
+    <div class="registro">
+        <div class="logo">ServDom</div>
+        <h2>Ingreso</h2>
+        <input type="text" id="nombreReg" placeholder="Nombre completo">
+        <input type="email" id="correoReg" placeholder="Correo electrónico">
+        <input type="password" id="passReg" placeholder="Contraseña">
+        <input type="password" id="passReg2" placeholder="Repetir contraseña">
+        <button class="btn dorado" onclick="registrarse()">✅ Entrar / Registrarse</button>
+    </div>
+</div>
+
+<div id="pantallaMenu" class="oculto">
+    <div class="saludo" id="saludo"></div>
+    <div class="menu">
+        <button onclick="abrir('inicio')">📋 INICIO</button>
+        <button onclick="abrir('personal')">👤 PERSONAL</button>
+        <button onclick="abrir('clientes')">🏠 CLIENTES</button>
+        <button onclick="abrir('calendario')">📅 CALENDARIO</button>
+        <button onclick="abrir('stock')">📦 STOCK</button>
+        <button onclick="abrir('sueldos')">💰 SUELDOS</button>
+        <button onclick="abrir('pagos')">💳 PAGOS</button>
+        <button onclick="abrir('graficas')">📊 GRÁFICAS</button>
+        <button class="rojo" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+    </div>
+</div>
+
+<div id="personal" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>👤 Agregar Empleado</h2>
+    <div class="tarjeta">
+        <input type="text" id="empNombre" placeholder="Nombre completo">
+        <input type="number" id="empEdad" placeholder="Edad">
+        <input type="tel" id="empTel" placeholder="Teléfono">
+        <input type="text" id="empCertEnf" placeholder="Certificado de enfermedad">
+        <input type="text" id="empCertSalud" placeholder="Certificado de salud">
+        <input type="date" id="empIngreso">
+        <input type="date" id="empEgreso" placeholder="Fecha de egreso">
+        <button class="btn dorado" onclick="agregarEmpleado()">✅ Guardar</button>
+    </div>
+    <div id="listaPersonal"></div>
+</div>
+
+<div id="clientes" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>🏠 Agregar Cliente</h2>
+    <div class="tarjeta">
+        <input type="text" id="cliNombre" placeholder="Nombre / Familia">
+        <input type="text" id="cliDir" placeholder="Dirección">
+        <input type="tel" id="cliTel" placeholder="Teléfono">
+        <input type="text" id="cliTareas" placeholder="Tareas a realizar">
+        <input type="text" id="cliHorario" placeholder="Horarios acordados">
+        <button class="btn dorado" onclick="agregarCliente()">✅ Guardar</button>
+    </div>
+    <div id="listaClientes"></div>
+</div>
+
+<div id="calendario" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>📅 Asignar Servicio</h2>
+    <div class="tarjeta">
+        <input type="date" id="servFecha">
+        <input type="time" id="servHora">
+        <input type="text" id="servCliente" placeholder="Cliente y Dirección">
+        <input type="text" id="servEmpleado" placeholder="Empleado Asignado">
+        <input type="text" id="servTarea" placeholder="Tarea a realizar">
+        <button class="btn dorado" onclick="agregarServicio()">✅ Guardar</button>
+    </div>
+    <div id="listaServicios"></div>
+</div>
+
+<div id="inicio" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>📋 Servicios Activos</h2>
+    <div id="listaInicio"></div>
+</div>
+
+<div id="stock" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>📦 Agregar Insumo</h2>
+    <div class="tarjeta">
+        <input type="text" id="prodNombre" placeholder="Nombre del insumo">
+        <input type="number" id="prodCant" placeholder="Cantidad actual">
+        <input type="number" id="prodMin" placeholder="Cantidad mínima">
+        <button class="btn dorado" onclick="agregarProducto()">✅ Guardar</button>
+    </div>
+    <div id="listaProductos"></div>
+</div>
+
+<div id="sueldos" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>💰 Calcular Sueldo</h2>
+    <div class="tarjeta">
+        <input type="text" id="liqEmpleado" placeholder="Nombre del Empleado">
+        <input type="number" id="liqHoras" placeholder="Horas trabajadas">
+        <input type="number" id="liqAdelanto" placeholder="Adelantos $">
+        <button class="btn dorado" onclick="calcularSueldo()">🧾 Calcular</button>
+        <div id="resSueldo" style="margin-top:12px;"></div>
+    </div>
+</div>
+
+<div id="pagos" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>💳 Pagos y Tarjetas</h2>
+    <div class="tarjeta">
+        <input type="text" id="tarTitular" placeholder="Titular">
+        <input type="text" id="tarNum" placeholder="Número">
+        <input type="text" id="tarVenc" placeholder="Vencimiento MM/AA">
+        <button class="btn dorado" onclick="guardarTarjeta()">✅ Guardar Tarjeta</button>
+    </div>
+</div>
+
+<div id="graficas" class="pantalla">
+    <button class="volver" onclick="volver()">← Volver</button>
+    <h2>📊 Resumen</h2>
+    <div class="tarjeta">
+        <p class="fila"><span class="etiqueta">👥 Personal:</span><span id="gPersonal">0</span></p>
+        <p class="fila"><span class="etiqueta">🏠 Clientes:</span><span id="gClientes">0</span></p>
+        <p class="fila"><span class="etiqueta">📝 Servicios:</span><span id="gServicios">0</span></p>
+    </div>
+</div>
+
+<script>
+let usuarioActivo = null;
+
+window.onload = function(){
+    let u = localStorage.getItem('servdom_usuario');
+    if(u){ usuarioActivo = JSON.parse(u); mostrarMenu(); }
+};
+
+function registrarse(){
+    let n = document.getElementById('nombreReg').value.trim();
+    let c = document.getElementById('correoReg').value.trim();
+    let p1 = document.getElementById('passReg').value;
+    let p2 = document.getElementById('passReg2').value;
+    if(!n || !c || !p1) return alert('Completa todos los campos');
+    if(p1 !== p2) return alert('Las contraseñas no coinciden');
+
+    let hayAdmin = localStorage.getItem('servdom_hayAdmin');
+    let rol = hayAdmin ? 'empleado' : 'admin';
+    if(!hayAdmin) localStorage.setItem('servdom_hayAdmin', 'SI');
+
+    localStorage.setItem('servdom_usuario', JSON.stringify({nombre:n, correo:c, rol:rol}));
+    alert(`¡Bienvenido ${n}! Rol: ${rol.toUpperCase()}`);
+    mostrarMenu();
+}
+
+function mostrarMenu(){
+    document.getElementById('pantallaRegistro').classList.add('oculto');
+    document.getElementById('pantallaMenu').classList.remove('oculto');
+    let h = new Date().getHours();
+    let saludo = h<12 ? '¡Buenos días' : h<19 ? '¡Buenas tardes' : '¡Buenas noches';
+    document.getElementById('saludo').textContent = `${saludo}, ${usuarioActivo.nombre}! — ${usuarioActivo.rol==='admin'?'🔑 Administrador':'👤 Empleado'}`;
+    actualizarGraficas();
+}
+
+function abrir(nombre){
+    document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('activa'));
+    document.getElementById('pantallaMenu').classList.add('oculto');
+    document.getElementById(nombre).classList.add('activa');
+    if(nombre==='inicio') cargarInicio();
+    if(nombre==='personal') cargarPersonal();
+    if(nombre==='clientes') cargarClientes();
+    if(nombre==='calendario') cargarServicios();
+    if(nombre==='stock') cargarStock();
+}
+
+function volver(){
+    document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('activa'));
+    document.getElementById('pantallaMenu').classList.remove('oculto');
+    actualizarGraficas();
+}
+
+function cerrarSesion(){ localStorage.removeItem('servdom_usuario'); location.reload(); }
+function guardarLista(clave,item){let l=JSON.parse(localStorage.getItem(clave)||'[]'); l.push(item); localStorage.setItem(clave,JSON.stringify(l));}
+function cargarLista(clave){return JSON.parse(localStorage.getItem(clave)||'[]');}
+
+function agregarEmpleado(){
+    let e={id:Date.now(), nombre:document.getElementById('empNombre').value, edad:document.getElementById('empEdad').value, tel:document.getElementById('empTel').value, certEnf:document.getElementById('empCertEnf').value, certSalud:document.getElementById('empCertSalud').value, ingreso:document.getElementById('empIngreso').value, egreso:document.getElementById('empEgreso').value||'Activo'};
+    if(!e.nombre) return alert('Escribe el nombre');
+    guardarLista('servdom_personal',e); alert('✅ Guardado');
+    document.getElementById('empNombre').value=''; document.getElementById('empEdad').value=''; document.getElementById('empTel').value=''; document.getElementById('empCertEnf').value=''; document.getElementById('empCertSalud').value=''; document.getElementById('empIngreso').value=''; document.getElementById('empEgreso').value='';
+    cargarPersonal(); actualizarGraficas();
+}
+
+function cargarPersonal(){
+    let l=cargarLista('servdom_personal');
+    document.getElementById('listaPersonal').innerHTML=l.length?l.map(e=>`<div class="tarjeta"><h3 style="color:var(--dorado); margin-bottom:8px;">${e.nombre}</h3><p class="fila"><span class="etiqueta">Edad:</span><span>${e.edad}</span></p><p class="fila"><span class="etiqueta">Teléfono:</span><span>${e.tel}</span></p><p class="fila"><span class="etiqueta">Ingreso:</span><span>${e.ingreso}</span></p><p class="fila"><span class="etiqueta">Egreso:</span><span>${e.egreso}</span></p></div>`).join(''):'<p style="text-align:center; color:#CBD5E1; padding:16px;">Sin empleados</p>';
+}
+
+function agregarCliente(){
+    let c={id:Date.now(), nombre:document.getElementById('cliNombre').value, dir:document.getElementById('cliDir').value, tel:document.getElementById('cliTel').value, tareas:document.getElementById('cliTareas').value, horario:document.getElementById('cliHorario').value};
+    if(!c.nombre) return alert('Escribe el nombre');
+    guardarLista('servdom_clientes',c); alert('✅ Guardado');
+    document.getElementById('cliNombre').value=''; document.getElementById('cliDir').value=''; document.getElementById('cliTel').value=''; document.getElementById('cliTareas').value=''; document.getElementById('cliHorario').value='';
+    cargarClientes(); actualizarGraficas();
+}
+
+function cargarClientes(){
+    let l=cargarLista('servdom_clientes');
+    document.getElementById('listaClientes').innerHTML=l.length?l.map(c=>`<div class="tarjeta"><h3 style="color:var(--dorado); margin-bottom:8px;">${c.nombre}</h3><p class="fila"><span class="etiqueta">Dirección:</span><span>${c.dir}</span></p><p class="fila"><span class="etiqueta">Teléfono:</span><span>${c.tel}</span></p><p class="fila"><span class="etiqueta">Tareas:</span><span>${c.tareas}</span></p></div>`).join(''):'<p style="text-align:center; color:#CBD5E1; padding:16px;">Sin clientes</p>';
+}
+
+function agregarServicio(){
+    let s={id:Date.now(), fecha:document.getElementById('servFecha').value, hora:document.getElementById('servHora').value, cliente:document.getElementById('servCliente').value, empleado:document.getElementById('servEmpleado').value, tarea:document.getElementById('servTarea').value};
+    if(!s.fecha||!s.empleado) return alert('Completa fecha y empleado');
+    guardarLista('servdom_servicios',s); alert('✅ Guardado');
+    document.getElementById('servFecha').value=''; document.getElementById('servHora').value=''; document.getElementById('servCliente').value=''; document.getElementById('servEmpleado').value=''; document.getElementById('servTarea').value='';
+    cargarServicios(); cargarInicio(); actualizarGraficas();
+}
+
+function cargarServicios(){
+    let l=cargarLista('servdom_servicios');
+    document.getElementById('listaServicios').innerHTML=l.length?l.map(s=>`<div class="tarjeta"><p style="color:var(--dorado); font-weight:bold;">${s.fecha} — ${s.hora}</p><p class="fila"><span class="etiqueta">Empleado:</span><span>${s.empleado}</span></p><p class="fila"><span class="etiqueta">Cliente:</span><span>${s.cliente}</span></p><p class="fila"><span class="etiqueta">Tarea:</span><span>${s.tarea}</span></p></div>`).join(''):'<p style="text-align:center; color:#CBD5E1; padding:16px;">Sin servicios</p>';
+}
+
+function cargarInicio(){
+    let l=cargarLista('servdom_servicios');
+    document.getElementById('listaInicio').innerHTML=l.length?l.map(s=>`<div class="tarjeta" style="border-left:3px solid var(--dorado);"><p style="color:var(--dorado); font-weight:bold;">${s.empleado} → ${s.cliente}</p><p class="etiqueta">${s.fecha} ${s.hora} · ${s.tarea}</p></div>`).join(''):'<p style="text-align:center; color:#CBD5E1; padding:16px;">Sin servicios asignados</p>';
+}
+
+function agregarProducto(){
+    let p={id:Date.now(), nombre:document.getElementById('prodNombre').value, cant:parseInt(document.getElementById('prodCant').value), min:parseInt(document.getElementById('prodMin').value)};
+    if(!p.nombre||isNaN(p.cant)) return alert('Completa los datos');
+    guardarLista('servdom_stock',p); alert('✅ Guardado');
+    document.getElementById('prodNombre').value=''; document.getElementById('prodCant').value=''; document.getElementById('prodMin').value='';
+    cargarStock();
+}
+
+function cargarStock(){
+    let l=cargarLista('servdom_stock');
+    document.getElementById('listaProductos').innerHTML=l.length?l.map(p=>{let av=p.cant<=p.min?'<p style="color:#FCD34D; margin-top:8px;">⚠️ Reponer</p>':'';return `<div class="tarjeta"><h3 style="color:var(--dorado);">${p.nombre}</h3><p class="fila"><span class="etiqueta">Cantidad:</span><span>${p.cant}</span></p><p class="fila"><span class="etiqueta">Mínimo:</span><span>${p.min}</span></p>${av}</div>`;}).join(''):'<p style="text-align:center; color:#CBD5E1; padding:16px;">Sin insumos</p>';
+}
+
+function calcularSueldo(){
+    let h=parseFloat(document.getElementById('liqHoras').value)||0;
+    let ad=parseFloat(document.getElementById('liqAdelanto').value)||0;
+    let vh=245; let br=h*vh; let bps=br*0.15; let irpf=br*0.06; let liq=br-bps-irpf-ad;
+    document.getElementById('resSueldo').innerHTML=`<hr style="border:none; border-bottom:1px solid rgba(96,165,250,0.2); margin:10px 0;"><p class="fila"><span>Bruto:</span><span>$${br.toFixed(2)}</span></p><p class="fila"><span>BPS 15%:</span><span>-$${bps.toFixed(2)}</span></p><p class="fila"><span>IRPF 6%:</span><span>-$${irpf.toFixed(2)}</span></p><p class="fila"><span>Adelantos:</span><span>-$${ad.toFixed(2)}</span></p><p class="fila" style="border-top:2px solid var(--dorado); padding-top:10px; margin-top:6px; font-weight:bold; color:var(--dorado);"><span>A cobrar:</span><span>$${liq.toFixed(2)}</span></p>`;
+}
+
+function guardarTarjeta(){
+    let t={id:Date.now(), titular:document.getElementById('tarTitular').value, numero:document.getElementById('tarNum').value, venc:document.getElementById('tarVenc').value};
+    if(!t.titular||!t.numero) return alert('Completa los datos');
+    guardarLista('servdom_tarjetas',t); alert('✅ Tarjeta guardada');
+    document.getElementById('tarTitular').value=''; document.getElementById('tarNum').value=''; document.getElementById('tarVenc').value='';
+}
+
+function actualizarGraficas(){
+    document.getElementById('gPersonal').textContent=cargarLista('servdom_personal').length;
+    document.getElementById('gClientes').textContent=cargarLista('servdom_clientes').length;
+    document.getElementById('gServicios').textContent=cargarLista('servdom_servicios').length;
+}
+</script>
+</body>
+</html>
